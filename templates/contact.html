@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crypto Tracker - Contact</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #eef2f7; scroll-behavior: smooth; }
+    header, footer { background: #111; color: white; padding: 1rem; text-align: center; }
+    nav a { color: white; margin: 0 10px; text-decoration: none; }
+    .banner { padding: 30px; text-align: center; background: #222; color: white; }
+    .contact-container { max-width: 900px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    .contact-container h2 { margin-top: 0; }
+    .contact-form { display: flex; flex-direction: column; gap: 15px; }
+    .contact-form input, .contact-form textarea { padding: 10px; font-size: 1em; border: 1px solid #ccc; border-radius: 5px; }
+    .contact-form input:focus, .contact-form textarea:focus { border-color: #28a745; outline: none; }
+    .contact-form button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+    .contact-form button:hover { background: #218838; }
+    .loader { display: none; text-align: center; margin-top: 10px; }
+    .loader-bar { width: 100%; height: 5px; background-color: #ddd; border-radius: 5px; margin-top: 10px; }
+    .loader-bar-inner { width: 0; height: 100%; background-color: #28a745; border-radius: 5px; transition: width 2s; }
+    footer p { margin: 5px; }
+    .social-icons { margin: 30px 0; text-align: center; }
+    .social-icons a { color: #111; margin: 0 10px; font-size: 2em; text-decoration: none; transition: 0.3s; }
+    .social-icons a:hover { color: #28a745; transform: scale(1.2); }
+    .floating-label { position: relative; }
+    .floating-label input, .floating-label textarea { padding-top: 15px; }
+    .floating-label label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 1em;
+      color: #aaa;
+      transition: 0.2s;
+    }
+    .floating-label input:focus + label, .floating-label textarea:focus + label { top: -10px; font-size: 0.85em; color: #28a745; }
+    .slideshow-container { position: relative; max-width: 100%; margin: 30px auto; overflow: hidden; }
+    .mySlides { display: none; width: 100%; height: 400px; object-fit: cover; }
+    .prev, .next {
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      padding: 16px;
+      background-color: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      font-size: 18px;
+      transform: translateY(-50%);
+      border-radius: 50%;
+    }
+    .prev { left: 20px; }
+    .next { right: 20px; }
+    .prev:hover, .next:hover { background-color: rgba(0,0,0,0.8); }
+    #map { height: 300px; margin: 30px auto; width: 90%; border-radius: 10px; }
+    #topBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 30px;
+      background: #28a745;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      font-size: 18px;
+      z-index: 99;
+    }
+    #topBtn:hover { background: #218838; }
+    @media (max-width: 768px) {
+      .contact-container { padding: 20px; }
+      .social-icons { font-size: 1.5em; }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+<header>
+  <h1>Crypto Portfolio Tracker</h1>
+  <nav>
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('prices') }}">Prices</a>
+    <a href="{{ url_for('portfolio') }}">Portfolio</a>
+    <a href="{{ url_for('about') }}">About</a>
+    <a href="{{ url_for('contact') }}">Contact</a>
+    <button id="toggleDarkMode" style="margin-left:20px;">🌙</button>
+  </nav>
+</header>
+
+<div class="banner">
+  <h2>Contact Us</h2>
+  <p>Have a question? We're here to help!</p>
+</div>
+
+<section class="contact-container">
+  <h2>Get in Touch</h2>
+  <form class="contact-form" id="contactForm">
+    <div class="floating-label">
+      <input type="text" id="name" placeholder=" " required>
+      <label for="name">Your Name</label>
+    </div>
+    <div class="floating-label">
+      <input type="email" id="email" placeholder=" " required>
+      <label for="email">Your Email</label>
+    </div>
+    <div class="floating-label">
+      <textarea id="message" rows="5" placeholder=" " required></textarea>
+      <label for="message">Your Message</label>
+    </div>
+    <button type="submit">Send Message</button>
+    <div class="loader">
+      Sending...
+      <div class="loader-bar"><div class="loader-bar-inner"></div></div>
+    </div>
+  </form>
+</section>
+
+<section class="slideshow-container">
+  <img class="mySlides" src="{{ url_for('static', filename='images/price1.png') }}" alt="Crypto 1">
+<img class="mySlides" src="{{ url_for('static', filename='images/price2.png') }}" alt="Crypto 2">
+<img class="mySlides" src="{{ url_for('static', filename='images/price3.png') }}" alt="Crypto 3">
+<img class="mySlides" src="{{ url_for('static', filename='images/price4.png') }}" alt="Crypto 4">
+  <button class="prev" onclick="plusSlides(-1)">&#10094;</button>
+  <button class="next" onclick="plusSlides(1)">&#10095;</button>
+</section>
+
+<section class="social-icons">
+  <h3>Follow Us</h3>
+  <a href="https://facebook.com/" target="_blank"><i class="fab fa-facebook"></i></a>
+  <a href="https://twitter.com/" target="_blank"><i class="fab fa-twitter"></i></a>
+  <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
+  <a href="https://linkedin.com/" target="_blank"><i class="fab fa-linkedin"></i></a>
+  <a href="https://wa.me/1234567890" target="_blank"><i class="fab fa-whatsapp"></i></a>
+</section>
+
+<section>
+  <h3>Our Location</h3>
+  <div id="map"></div>
+</section>
+
+<footer>
+  <p>&copy; 2025 Crypto Tracker. All rights reserved.</p>
+</footer>
+
+<button onclick="topFunction()" id="topBtn" title="Go to top"><i class="fas fa-arrow-up"></i></button>
+
+<script>
+  const contactForm = document.getElementById('contactForm');
+  contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const message = document.getElementById('message').value.trim();
+    if (name && email && message) {
+      document.querySelector('.loader').style.display = 'block';
+      setTimeout(function() {
+        alert('Thank you, ' + name + '! Your message has been sent.');
+        contactForm.reset();
+        document.querySelector('.loader').style.display = 'none';
+      }, 2000);
+    } else {
+      alert('Please fill out all fields.');
+    }
+  });
+
+  document.getElementById('email').addEventListener('blur', function() {
+    const regex = /^[^ ]+@[^ ]+\.[a-z]{2,6}$/;
+    if (!regex.test(this.value.trim())) {
+      alert('Please enter a valid email address.');
+    }
+  });
+
+  let slideIndex = 1;
+  showSlides(slideIndex);
+
+  function plusSlides(n) {
+    showSlides(slideIndex += n);
+  }
+
+  function showSlides(n) {
+    let i;
+    const slides = document.getElementsByClassName("mySlides");
+    if (n > slides.length) {slideIndex = 1}    
+    if (n < 1) {slideIndex = slides.length}
+    for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";  
+    }
+    slides[slideIndex-1].style.display = "block";  
+  }
+
+  setInterval(function(){ plusSlides(1); }, 3000);
+
+  function initMap() {
+    const location = {lat: 37.7749, lng: -122.4194};
+    const map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 12,
+      center: location
+    });
+    const marker = new google.maps.Marker({position: location, map: map});
+  }
+
+  window.onscroll = function() {scrollFunction()};
+  function scrollFunction() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+      document.getElementById("topBtn").style.display = "block";
+    } else {
+      document.getElementById("topBtn").style.display = "none";
+    }
+  }
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+
+</body>
+</html>

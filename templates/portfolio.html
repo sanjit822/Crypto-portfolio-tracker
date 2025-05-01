@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto Tracker - Portfolio</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9fbfd; }
+    header, footer { background: #111; color: white; padding: 1rem; text-align: center; }
+    nav a { color: white; margin: 0 10px; text-decoration: none; }
+    .clock { font-size: 1rem; margin-top: 5px; }
+    .banner { padding: 30px; text-align: center; background: #222; color: white; }
+    .portfolio-container { max-width: 1000px; margin: 40px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    .holding { display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #ddd; }
+    .holding:last-child { border-bottom: none; }
+    .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-top: 20px; }
+    .percentage-change { color: green; font-size: 1rem; text-align: right; margin-top: 5px; }
+    .search-bar { text-align: center; margin-bottom: 20px; }
+    .search-bar input { padding: 10px; width: 300px; border-radius: 5px; border: 1px solid #ccc; }
+    .images { display: flex; justify-content: center; gap: 20px; margin: 30px; flex-wrap: wrap; }
+    .images img { width: 300px; height: 200px; object-fit: cover; border-radius: 10px; }
+    footer p { margin: 5px; }
+    .graph-container { width: 80%; margin: 40px auto; text-align: center; }
+    canvas { width: 100%; height: 400px; border-radius: 10px; }
+    .history { background: #fff; padding: 20px; margin-top: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .history-table th, .history-table td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+    .history-table th { background: #f2f2f2; }
+    .buttons { text-align: center; margin: 20px; }
+    .buttons button { padding: 10px 20px; margin: 10px; border: none; background: #007BFF; color: white; border-radius: 5px; cursor: pointer; }
+    .buttons button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Crypto Portfolio Tracker</h1>
+  <div class="clock" id="clock"></div>
+  <nav>
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('prices') }}">Prices</a>
+    <a href="{{ url_for('portfolio') }}">Portfolio</a>
+    <a href="{{ url_for('about') }}">About</a>
+    <a href="{{ url_for('contact') }}">Contact</a>
+    <button id="toggleDarkMode" style="margin-left:20px;">🌙</button>
+  </nav>
+</header>
+
+<div class="banner">
+  <h2>Your Portfolio</h2>
+  <p>View and manage your cryptocurrency assets.</p>
+</div>
+
+<section class="portfolio-container" id="portfolio">
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search Coin...">
+  </div>
+  <!-- Holdings will be inserted by JS -->
+</section>
+
+<!-- Buttons -->
+<div class="buttons">
+  <button onclick="downloadCSV()">Download Portfolio (CSV)</button>
+  <button onclick="alert('Feature coming soon: Add new transaction!')">Add New Transaction</button>
+</div>
+
+<!-- Portfolio Graph -->
+<div class="graph-container">
+  <h3>Portfolio Value Over Time</h3>
+  <canvas id="portfolioChart"></canvas>
+</div>
+
+<!-- Portfolio Pie Chart -->
+<div class="graph-container">
+  <h3>Holdings Breakdown</h3>
+  <canvas id="pieChart"></canvas>
+</div>
+
+<section class="images">
+  <img src="{{ url_for('static', filename='images/price1.png') }}" alt="Why Choose Us" >
+  <img src="{{ url_for('static', filename='images/price2.png') }}" alt="Why Choose Us" >
+  <img src="{{ url_for('static', filename='images/price3.png') }}" alt="Why Choose Us" >
+  <img src="{{ url_for('static', filename='images/price4.png') }}" alt="Why Choose Us" >
+  <img src="{{ url_for('static', filename='images/price5.png') }}" alt="Why Choose Us" >
+  <img src="{{ url_for('static', filename='images/price6.png') }}" alt="Why Choose Us" >
+</section>
+
+<section class="history">
+  <h3>Transaction History</h3>
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Transaction</th>
+        <th>Amount</th>
+        <th>Price</th>
+        <th>Total Value</th>
+      </tr>
+    </thead>
+    <tbody id="transactionHistory">
+      <!-- Transactions will be inserted by JS -->
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <p>&copy; 2025 Crypto Tracker. All rights reserved.</p>
+</footer>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const holdings = [
+    { coin: 'Bitcoin (BTC)', amount: 0.5, price: 65000 },
+    { coin: 'Ethereum (ETH)', amount: 2, price: 4200 },
+    { coin: 'Cardano (ADA)', amount: 1000, price: 1.35 }
+  ];
+
+  const transactions = [
+    { date: '2025-04-20', type: 'Buy', coin: 'Bitcoin (BTC)', amount: 0.5, price: 65000 },
+    { date: '2025-04-22', type: 'Sell', coin: 'Ethereum (ETH)', amount: 1, price: 4500 },
+    { date: '2025-04-23', type: 'Buy', coin: 'Cardano (ADA)', amount: 1000, price: 1.35 }
+  ];
+
+  function loadPortfolio() {
+    const container = document.getElementById('portfolio');
+    container.innerHTML = `
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search Coin..." oninput="filterHoldings()">
+      </div>
+    `;
+
+    let totalValue = 0;
+    holdings.forEach(asset => totalValue += asset.amount * asset.price);
+
+    const percentageChange = Math.random() * (5 - (-5)) + (-5); // Random mock % change
+
+    holdings.forEach(asset => {
+      const value = asset.amount * asset.price;
+      const div = document.createElement('div');
+      div.className = 'holding';
+      div.innerHTML = `
+        <span><strong>${asset.coin}</strong><br>${asset.amount} coins</span>
+        <span>$${value.toLocaleString()}</span>
+      `;
+      container.appendChild(div);
+    });
+
+    const totalDiv = document.createElement('div');
+    totalDiv.className = 'total';
+    totalDiv.innerHTML = `
+      Total Portfolio Value: <span id="counter">$0</span>
+      <div class="percentage-change">Change: ${percentageChange.toFixed(2)}%</div>
+    `;
+    container.appendChild(totalDiv);
+
+    animateCounter('counter', 0, totalValue, 2000);
+  }
+
+  function filterHoldings() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const holdingsDivs = document.querySelectorAll('.holding');
+    holdingsDivs.forEach(div => {
+      const text = div.textContent.toLowerCase();
+      div.style.display = text.includes(input) ? 'flex' : 'none';
+    });
+  }
+
+  function generateGraph() {
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['January', 'February', 'March', 'April', 'May'],
+        datasets: [{
+          label: 'Portfolio Value ($)',
+          data: [65000, 70000, 75000, 72000, 80000],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'Crypto Portfolio Value Over Time' } }
+      }
+    });
+  }
+
+  function generatePieChart() {
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: holdings.map(h => h.coin),
+        datasets: [{
+          label: 'Holdings',
+          data: holdings.map(h => h.amount * h.price),
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'Holdings Breakdown' } }
+      }
+    });
+  }
+
+  function loadTransactionHistory() {
+    const transactionHistory = document.getElementById('transactionHistory');
+    transactions.forEach(transaction => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${transaction.date}</td>
+        <td>${transaction.type} ${transaction.coin}</td>
+        <td>${transaction.amount}</td>
+        <td>$${transaction.price}</td>
+        <td>$${(transaction.amount * transaction.price).toLocaleString()}</td>
+      `;
+      transactionHistory.appendChild(row);
+    });
+  }
+
+  function animateCounter(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      obj.innerHTML = `$${Math.floor(progress * (end - start) + start).toLocaleString()}`;
+      if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+  }
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').innerText = now.toLocaleTimeString();
+  }
+  setInterval(updateClock, 1000);
+
+  function downloadCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Coin,Amount,Price,Total Value\n";
+    holdings.forEach(h => {
+      csvContent += `${h.coin},${h.amount},${h.price},${h.amount * h.price}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "crypto_portfolio.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    loadPortfolio();
+    generateGraph();
+    generatePieChart();
+    loadTransactionHistory();
+    updateClock();
+  });
+</script>
+
+</body>
+</html>
